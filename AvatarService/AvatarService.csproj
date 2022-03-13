@@ -14,4 +14,10 @@
     <PackageReference Include="System.Runtime.Experimental" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Fonts\Montserrat-Regular.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

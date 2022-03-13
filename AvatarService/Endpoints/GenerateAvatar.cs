@@ -56,7 +56,9 @@ public class GenerateAvatar
         });
         image.Mutate(i =>
         {
-            var font = SystemFonts.CreateFont("Arial", size, FontStyle.Regular);
+            FontCollection collection = new();
+            var family = collection.Add("Fonts/Montserrat-Regular.ttf");
+            var font = family.CreateFont(size, FontStyle.Regular);
             var options = new TextOptions(font)
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
