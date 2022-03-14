@@ -3,17 +3,18 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace AvatarService.Endpoints;
 
-public class GenerateAvatar
+public static class AvatarGenerator
 {
-    private const int BaseSize = 200;
-    
-    public async Task<byte[]> Generate(string name, int width = BaseSize, int height = BaseSize)
+    public static async Task<byte[]> Generate(string name, string ext, int width, int height)
     {
         var maxSize = width > height ? width : height;
         var initials = Initials(name);
@@ -71,7 +72,13 @@ public class GenerateAvatar
         
         var ms = new MemoryStream();
 
-        await image.SaveAsync(ms, new WebpEncoder());
+        IImageEncoder encoder = ext.ToLower() switch
+        {
+            "webp" => new WebpEncoder(),
+            "jpg" or "jpeg" => new JpegEncoder(),
+            _ => new PngEncoder()
+        };
+        await image.SaveAsync(ms, encoder);
         ms.Seek(0, SeekOrigin.Begin);
         
         return ms.ToArray();
@@ -84,13 +91,17 @@ public class GenerateAvatar
 
 public static class GenerateAvatarHelpers
 {
+    private const int BaseSize = 200;
+    
     public static WebApplication MapGenerateAvatars(this WebApplication app)
     {
         app
-            .MapGet("avatar/{name}", async (string name, int? width, int? height) =>
+            .MapGet("avatar/{name}.{ext}", async (string name, string ext, int? width, int? height, HttpResponse res) =>
             {
-                var imageStream = await new GenerateAvatar().Generate(name, width ?? 200, height ?? 200);
-                return Results.File(imageStream, "image/png");
+                var imageStream = await AvatarGenerator.Generate(name, ext, width ?? BaseSize, height ?? BaseSize);
+                
+                res.Headers.Add("Cache-Control", $"public, immutable, max-age={365 * 24 * 60 * 60}");
+                return Results.File(imageStream, $"image/{ext}");
             })
             .WithName("GenerateAvatar");
         return app;
