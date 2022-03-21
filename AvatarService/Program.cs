@@ -1,4 +1,5 @@
 using AvatarService.Endpoints;
+using AvatarService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +14,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.InjectStylesheet("/swagger-dark.css");
+        c.RoutePrefix = "swagger";
+        c.InjectStylesheet("/css/swagger-dark.css");
     });
 }
 
 app.UseHttpsRedirection();
+
+// Middleware
+app.UseMiddleware<RequestTimingMiddleware>();
 
 // Endpoints
 app.MapGenerateAvatars();

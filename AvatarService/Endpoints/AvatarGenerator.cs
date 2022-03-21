@@ -2,6 +2,7 @@ using AvatarService.Infrastructure;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -14,9 +15,13 @@ namespace AvatarService.Endpoints;
 
 public static class AvatarGenerator
 {
+    public const int BaseSize = 200;
+    
     public static async Task<byte[]> Generate(string name, string ext, int width, int height)
     {
         var maxSize = width > height ? width : height;
+        var vPadding = height / 10;
+        var hPadding = width / 10;
         var initials = Initials(name);
         
         // Generate colours
@@ -33,19 +38,12 @@ public static class AvatarGenerator
             ? Color.FromRgba(255, 255, 255, 200) 
             : Color.FromRgba(0, 0, 0, 200);
 
-        
-        // Calculate font size
-        var size = initials.Length switch
-        {
-            1 => 120,
-            2 => 120,
-            3 => 90,
-            4 => 75,
-            _ => 60
-        };
-
         // Generate image
         using var image = new Image<Rgba32>(width, height, Color.White);
+        image.Metadata.HorizontalResolution = width;
+        image.Metadata.VerticalResolution = height;
+        
+        // Add gradient
         image.Mutate(i =>
         {
             var colorStops = new[]
@@ -55,28 +53,41 @@ public static class AvatarGenerator
             };
             i.Fill(new RadialGradientBrush(new PointF(width * 0.1f, height * 0.1f), maxSize, GradientRepetitionMode.None, colorStops));
         });
+        
+        // Create font
+        FontCollection collection = new();
+        var family = collection.Add("Fonts/Montserrat-Regular.ttf");
+        var font = family.CreateFont(BaseSize, FontStyle.Regular);
+        
+        // Resize text
+        var vector = TextBuilder.GenerateGlyphs(initials, new TextOptions(font));
+
+        var vScale = 1 / (vector.Bounds.Height / (height - vPadding * 2));
+        var hScale = 1 / (vector.Bounds.Width / (width - hPadding * 2));
+        var size = BaseSize * Math.Min(vScale, hScale);
+        
+        var resizedFont = new Font(font, size);
+        
+        // Add text
+        var options = new TextOptions(resizedFont)
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Origin = new PointF(width * 0.5f, height * 0.5f)
+        };
+        
         image.Mutate(i =>
         {
-            FontCollection collection = new();
-            var family = collection.Add("Fonts/Montserrat-Regular.ttf");
-            var font = family.CreateFont(size, FontStyle.Regular);
-            var options = new TextOptions(font)
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Origin = new PointF(width * 0.5f, height * 0.5f)
-            };
             i.DrawText(options, initials, textColor);
         });
-        // image.Mutate(i => i.Vignette(Rgba32.ParseHex("000000b2")));
         
+        // Encode image
         var ms = new MemoryStream();
-
         IImageEncoder encoder = ext.ToLower() switch
         {
-            "webp" => new WebpEncoder(),
+            "webp"          => new WebpEncoder(),
             "jpg" or "jpeg" => new JpegEncoder(),
-            _ => new PngEncoder()
+            _ /* PNG */     => new PngEncoder()
         };
         await image.SaveAsync(ms, encoder);
         ms.Seek(0, SeekOrigin.Begin);
@@ -91,16 +102,19 @@ public static class AvatarGenerator
 
 public static class GenerateAvatarHelpers
 {
-    private const int BaseSize = 200;
-    
     public static WebApplication MapGenerateAvatars(this WebApplication app)
     {
         app
             .MapGet("avatar/{name}.{ext}", async (string name, string ext, int? width, int? height, HttpResponse res) =>
             {
-                var imageStream = await AvatarGenerator.Generate(name, ext, width ?? BaseSize, height ?? BaseSize);
+                var imageStream = await AvatarGenerator.Generate(
+                    name, 
+                    ext, 
+                    width ?? AvatarGenerator.BaseSize, 
+                    height ?? AvatarGenerator.BaseSize
+                );
                 
-                res.Headers.Add("Cache-Control", $"public, immutable, max-age={365 * 24 * 60 * 60}");
+                res.Headers.Add("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
                 return Results.File(imageStream, $"image/{ext}");
             })
             .WithName("GenerateAvatar");

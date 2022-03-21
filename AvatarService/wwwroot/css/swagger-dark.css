@@ -1,3 +1,9 @@
+/*Custom*/
+.swagger-ui img.full-width {
+    width: auto !important;
+}
+/*End Custom*/
+
 a { color: #8c8cfa; }
 
 ::-webkit-scrollbar-track-piece { background-color: rgba(255, 255, 255, .2) !important; }
