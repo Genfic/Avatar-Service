@@ -10,15 +10,16 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseStaticFiles();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.RoutePrefix = "swagger";
-        c.InjectStylesheet("/css/swagger-dark.css");
+        c.InjectStylesheet("https://cdn.genfic.net/file/Ogma-net/swagger-dark.css");
     });
 }
 
+// app.UseDefaultFiles();
+app.UseFileServer();
 app.UseHttpsRedirection();
 
 // Middleware
