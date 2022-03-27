@@ -2,8 +2,9 @@ name: Publish
 
 on:
   push:
-    tags: 
-      - release-*
+    branches: [ master ]
+#    tags: 
+#      - release-*
         
 jobs: 
   build:
@@ -23,7 +24,7 @@ jobs:
       - name: Deploy
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: ${{ GITHUB_WORKSPACE }}/deploy 
+          local: ${{ github.workspace }}/deploy 
           remote: ~/image-service
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
