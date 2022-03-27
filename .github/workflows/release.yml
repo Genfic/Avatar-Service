@@ -2,9 +2,9 @@ name: Publish
 
 on:
   push:
-    branches: [ master ]
-#    tags: 
-#      - release-*
+#    branches: [ master ]
+    tags: 
+      - release-*
         
 jobs:   
   publish:
