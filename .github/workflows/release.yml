@@ -6,12 +6,15 @@ on:
 #    tags: 
 #      - release-*
         
-jobs: 
-  build:
+jobs:   
+  publish:
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v2
+          
+      - name: Test
+        run: echo ${{ secrets.TEST }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
