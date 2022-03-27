@@ -22,10 +22,11 @@ jobs:
         run: dotnet publish -c Release -r linux-x64 --self-contained=false -o deploy
         
       - name: Deploy
-        uses: garygrossgarten/github-action-scp@release
+        uses: appleboy/scp-action@master
         with:
-          local: ${{ github.workspace }}/deploy 
-          remote: ~/image-service
+          source: ${{ github.workspace }}/deploy 
+          target: ~/image-service
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          privateKey: ${{ secrets.SSK_KEY }}
+          key: ${{ secrets.SSK_KEY }}
+          rm: true
