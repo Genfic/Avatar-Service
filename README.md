@@ -1,1 +1,1 @@
-# Avatar Service
+# Image Service

@@ -1,5 +1,5 @@
-using AvatarService.Endpoints;
-using AvatarService.Middleware;
+using ImageService.Endpoints;
+using ImageService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

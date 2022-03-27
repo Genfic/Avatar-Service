@@ -1,4 +1,4 @@
-using AvatarService.Infrastructure;
+using ImageService.Infrastructure;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
@@ -11,7 +11,7 @@ using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace AvatarService.Endpoints;
+namespace ImageService.Endpoints;
 
 public static class AvatarGenerator
 {

@@ -3,7 +3,7 @@ using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.ColorSpaces.Conversion;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace AvatarService.Infrastructure;
+namespace ImageService.Infrastructure;
 
 public static class ColorHelpers
 {

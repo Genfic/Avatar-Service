@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace AvatarService.Middleware;
+namespace ImageService.Middleware;
 
 public class RequestTimingMiddleware
 {

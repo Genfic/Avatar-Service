@@ -1,4 +1,4 @@
-namespace AvatarService.Infrastructure;
+namespace ImageService.Infrastructure;
 
 // public static class SpanExtensions
 // {
