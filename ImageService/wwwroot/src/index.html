@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Genfic Image Service</title>
+    <link rel="stylesheet" href="css/style.scss">
+</head>
+<body>
+<nav>
+    <h1>Genfic Image Service</h1>
+</nav>
+
+<section>
+    <h2 class="head">Avatar service</h2>
+    <div class="docs">
+        <h3>Endpoint</h3>
+        <pre>GET: /avatar/{name}.{extension}</pre>
+        <h3>Parameters</h3>
+        <dl>
+            <dt class="required">name</dt>
+            <dd>Name to generate the avatar for. Use <code>-_</code> or space as separators</dd>
+
+            <dt class="required">extension</dt>
+            <dd>File extension. <code>jpg, jpeg, png, webp</code> are supported</dd>
+
+            <dt>width</dt>
+            <dd>Image width in pixels</dd>
+
+            <dt>height</dt>
+            <dd>Image height in pixels</dd>
+        </dl>
+    </div>
+    <div class="try">
+        <form id="try-avatar">
+            <label for="avatar-name">Name</label>
+            <input name="name" id="avatar-name" type="text" required>
+
+            <label for="avatar-extension">Extension</label>
+            <select name="extension" id="avatar-extension" required>
+                <option value="png" selected>png</option>
+                <option value="jpg">jpg</option>
+                <option value="jpeg">jpeg</option>
+                <option value="webp">webp</option>
+                <option value="unga">unga</option>
+            </select>
+
+            <label for="avatar-width">Width</label>
+            <input name="width" type="number" id="avatar-width" min="0" max="800">
+
+            <label for="avatar-height">Height</label>
+            <input name="height" type="number" id="avatar-height" min="0" max="800">
+
+            <input type="hidden" name="url" value="/avatar/">
+            
+            <input type="submit" value="Try it!">
+        </form>
+        <div class="result">
+            <img src="/avatar/test-image.webp" id="avatar-image">
+        </div>
+    </div>
+</section>
+
+<script type="module" src="js/script.ts"></script>
+
+</body>
+</html>

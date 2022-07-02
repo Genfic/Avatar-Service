@@ -23,4 +23,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\src\js\dist\script.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\src\js\dist\script.js.map" />
+  </ItemGroup>
+
 </Project>
