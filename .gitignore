@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Build artifacts
+ImageService/wwwroot/css/dist/
+ImageService/wwwroot/js/dist/
+
+# Caches
+.parcel-cache/
+
 # User-specific files
 *.rsuser
 *.suo

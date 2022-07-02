@@ -19,11 +19,11 @@ public static class AvatarGenerator
     
     public static async Task<byte[]> Generate(string name, string ext, int width, int height)
     {
-        var maxSize = width > height ? width : height;
+        var maxSize = Math.Max(width, height);
         var vPadding = height / 10;
         var hPadding = width / 10;
         var initials = Initials(name);
-        
+
         // Generate colours
         var seed = name.GetDeterministicHashCode();
         var rng = new Random(seed);
