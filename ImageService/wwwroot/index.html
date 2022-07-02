@@ -32,5 +32,25 @@
     </dl>
 </section>
 
+<section>
+    <h2>Cover service</h2>
+    <h3>Endpoint</h3>
+    <pre>GET: /cover/{title}.{extension}</pre>
+    <h3>Parameters</h3>
+    <dl>
+        <dt class="required">title</dt>
+        <dd>Title to generate the cover for. Use <code>-_</code> or space as separators</dd>
+
+        <dt class="required">extension</dt>
+        <dd>File extension. <code>jpg, jpeg, png, webp</code> are supported</dd>
+
+        <dt>width</dt>
+        <dd>Image width in pixels</dd>
+
+        <dt>height</dt>
+        <dd>Image height in pixels. If not provided, equal to <code>1.25 &times; width</code></dd>
+    </dl>
+</section>
+
 </body>
 </html>

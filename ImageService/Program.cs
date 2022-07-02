@@ -26,6 +26,8 @@ app.UseHttpsRedirection();
 app.UseMiddleware<RequestTimingMiddleware>();
 
 // Endpoints
-app.MapGenerateAvatars();
+app
+    .MapGenerateAvatars()
+    .MapGenerateCovers();
 
 app.Run();
