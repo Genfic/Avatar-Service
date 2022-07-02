@@ -26,6 +26,8 @@
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\src\js\dist\script.js" />
     <_ContentIncludedByDefault Remove="wwwroot\src\js\dist\script.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\src\js\avatar.ts" />
+    <_ContentIncludedByDefault Remove="wwwroot\src\js\script.ts" />
   </ItemGroup>
 
 </Project>
