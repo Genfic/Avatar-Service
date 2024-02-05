@@ -69,7 +69,7 @@ public static class AvatarGenerator
         var resizedFont = new Font(font, size);
         
         // Add text
-        var options = new TextOptions(resizedFont)
+        var options = new RichTextOptions(resizedFont)
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
@@ -80,7 +80,7 @@ public static class AvatarGenerator
         {
             i.DrawText(options, initials, textColor);
         });
-        
+ 
         // Encode image
         var ms = new MemoryStream();
         IImageEncoder encoder = ext.ToLower() switch
@@ -114,7 +114,7 @@ public static class GenerateAvatarHelpers
                     height ?? AvatarGenerator.BaseSize
                 );
                 
-                res.Headers.Add("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
+                res.Headers.Append("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
                 return Results.File(imageStream, $"image/{ext}");
             })
             .WithName("GenerateAvatar");

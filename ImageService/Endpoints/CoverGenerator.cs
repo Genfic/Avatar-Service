@@ -19,13 +19,10 @@ public static class CoverGenerator
     private const float BorderOffset = 10f;
     private const float BorderWidth = 4;
     
-    public static async Task<byte[]> Generate(string name, string ext, int width, int height)
+    public static async Task<byte[]> Generate(string name, string author, string ext, int width, int height)
     {
         var maxSize = width > height ? width : height;
-        var vPadding = height / 10f;
-        var hPadding = width / 10f + BorderOffset / 2;
-        var initials = Initials(name);
-        
+
         // Generate colours
         var seed = name.GetDeterministicHashCode();
         var rng = new Random(seed);
@@ -62,25 +59,37 @@ public static class CoverGenerator
         var font = family.CreateFont(BaseSize, FontStyle.Regular);
         
         // Resize text
-        var vector = TextBuilder.GenerateGlyphs(initials, new TextOptions(font));
+        var resizedTitleFont = ResizeFont(name, width, height, font);
 
-        var vScale = 1 / (vector.Bounds.Height / (height - vPadding * 2));
-        var hScale = 1 / (vector.Bounds.Width / (width - hPadding * 2));
-        var size = Math.Min(BaseSize * Math.Min(vScale, hScale), height * .5f);
-        
-        var resizedFont = new Font(font, size);
-        
         // Add text
-        var options = new TextOptions(resizedFont)
+        var titleTextOptions = new RichTextOptions(resizedTitleFont)
         {
             HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            Origin = new PointF(width * 0.5f, height * 0.5f)
+            VerticalAlignment = VerticalAlignment.Top,
+            Origin = new PointF(width * 0.5f, BorderOffset * 2f),
+            WrappingLength = width,
+            TextAlignment = TextAlignment.Center
         };
         
         image.Mutate(i =>
         {
-            i.DrawText(options, initials, textColor);
+            i.DrawText(titleTextOptions, name, textColor);
+        });
+
+        var resizedAuthorFont = ResizeFont(name, width, height, font, .8f);
+
+        var authorTextOptions = new RichTextOptions(resizedAuthorFont)
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Origin = new PointF(width * .5f, height - (BorderOffset * 2f)),
+            WrappingLength = width,
+            TextAlignment = TextAlignment.Center
+        };
+        
+        image.Mutate(i =>
+        {
+            i.DrawText(authorTextOptions, author, textColor);
         });
         
         // Create border
@@ -109,10 +118,24 @@ public static class CoverGenerator
         
         return ms.ToArray();
     }
-    
-    private static string Initials(string name) => string.Join(string.Empty, name
-        .Split(' ', '_', '-')
-        .Select(s => s.Trim().ToUpper()[0]));
+
+    private static Font ResizeFont(string text, int width, int height, Font font, float scale = 1f)
+    {
+        var vPadding = height / 10f;
+        var hPadding = width / 10f + BorderOffset / 2;
+        
+        var vector = TextBuilder.GenerateGlyphs(text, new TextOptions(font)
+        {
+            WrappingLength = width,
+            HorizontalAlignment = HorizontalAlignment.Center
+        });
+
+        var vScale = 1 / (vector.Bounds.Height / (height - vPadding * 3));
+        var hScale = 1 / (vector.Bounds.Width / (width - hPadding * 3));
+        var size = Math.Min(BaseSize * Math.Min(vScale, hScale), height * .5f) * scale;
+
+        return new Font(font, size);
+    }
 }
 
 public static class GenerateCoverHelpers
@@ -120,16 +143,17 @@ public static class GenerateCoverHelpers
     public static WebApplication MapGenerateCovers(this WebApplication app)
     {
         app
-            .MapGet("cover/{name}.{ext}", async (string name, string ext, int? width, int? height, HttpResponse res) =>
+            .MapGet("cover/{name}.{ext}", async (string name, string author, string ext, int? width, int? height, HttpResponse res) =>
             {
                 var imageStream = await CoverGenerator.Generate(
                     name, 
+                    author,
                     ext, 
                     width ?? AvatarGenerator.BaseSize, 
-                    height ?? (int)Math.Round(AvatarGenerator.BaseSize * 1.25)
+                    height ?? (int)Math.Round((width ?? AvatarGenerator.BaseSize) * 1.25)
                 );
                 
-                res.Headers.Add("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
+                res.Headers.Append("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
                 return Results.File(imageStream, $"image/{ext}");
             })
             .WithName("GenerateCover");

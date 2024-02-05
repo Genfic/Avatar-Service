@@ -2,11 +2,8 @@ using System.Diagnostics;
 
 namespace ImageService.Middleware;
 
-public class RequestTimingMiddleware
+public class RequestTimingMiddleware(RequestDelegate next)
 {
-    private RequestDelegate _next;
-    public RequestTimingMiddleware(RequestDelegate next) => _next = next;
-
     public Task Invoke(HttpContext context)
     {
         var watch = new Stopwatch();
@@ -15,10 +12,10 @@ public class RequestTimingMiddleware
         context.Response.OnStarting(() =>
         {
             watch.Stop();
-            context.Response.Headers.Add("X-Response-Time", $"{watch.ElapsedMilliseconds} ms");
+            context.Response.Headers.Append("X-Response-Time", $"{watch.ElapsedMilliseconds} ms");
             return Task.CompletedTask;
         });
 
-        return _next(context);
+        return next(context);
     }
 }

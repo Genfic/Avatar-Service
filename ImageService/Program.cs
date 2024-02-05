@@ -28,6 +28,7 @@ app.UseMiddleware<RequestTimingMiddleware>();
 // Endpoints
 app
     .MapGenerateAvatars()
-    .MapGenerateCovers();
+    .MapGenerateCovers()
+    .MapGet("ping", () => $"pong {DateTimeOffset.Now}");
 
 app.Run();
