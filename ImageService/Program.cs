@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ImageService.Endpoints;
 using ImageService.Middleware;
 

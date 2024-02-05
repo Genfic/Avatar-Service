@@ -35,7 +35,7 @@
 <section>
     <h2>Cover service</h2>
     <h3>Endpoint</h3>
-    <pre>GET: /cover/{title}.{extension}</pre>
+    <pre>GET: /cover/{title}.{extension}?author={author}</pre>
     <h3>Parameters</h3>
     <dl>
         <dt class="required">title</dt>
@@ -43,6 +43,9 @@
 
         <dt class="required">extension</dt>
         <dd>File extension. <code>jpg, jpeg, png, webp</code> are supported</dd>
+        
+        <dt class="required">author</dt>
+        <dd>Author name to be displayed at the bottom of the cover</dd>
 
         <dt>width</dt>
         <dd>Image width in pixels</dd>

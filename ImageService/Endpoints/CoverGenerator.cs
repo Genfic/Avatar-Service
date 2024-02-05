@@ -22,6 +22,7 @@ public static class CoverGenerator
     public static async Task<byte[]> Generate(string name, string author, string ext, int width, int height)
     {
         var maxSize = width > height ? width : height;
+        var innerWidth = width - BorderOffset * 2;
 
         // Generate colours
         var seed = name.GetDeterministicHashCode();
@@ -67,7 +68,7 @@ public static class CoverGenerator
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
             Origin = new PointF(width * 0.5f, BorderOffset * 2f),
-            WrappingLength = width,
+            WrappingLength = innerWidth - BorderWidth * 2,
             TextAlignment = TextAlignment.Center
         };
         
@@ -76,14 +77,14 @@ public static class CoverGenerator
             i.DrawText(titleTextOptions, name, textColor);
         });
 
-        var resizedAuthorFont = ResizeFont(name, width, height, font, .8f);
+        var resizedAuthorFont = ResizeFont(name, width, height, font, .6f);
 
         var authorTextOptions = new RichTextOptions(resizedAuthorFont)
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Bottom,
             Origin = new PointF(width * .5f, height - (BorderOffset * 2f)),
-            WrappingLength = width,
+            WrappingLength = innerWidth - BorderWidth * 2,
             TextAlignment = TextAlignment.Center
         };
         
@@ -95,7 +96,7 @@ public static class CoverGenerator
         // Create border
         image.Mutate(ctx =>
         {            
-            var border = new RectangleF(BorderOffset, BorderOffset, width - BorderOffset * 2, height - BorderOffset * 2);
+            var border = new RectangleF(BorderOffset, BorderOffset, innerWidth, height - BorderOffset * 2);
             var colorStops = new[]
             {
                 new ColorStop(0f, endColor),
@@ -143,10 +144,10 @@ public static class GenerateCoverHelpers
     public static WebApplication MapGenerateCovers(this WebApplication app)
     {
         app
-            .MapGet("cover/{name}.{ext}", async (string name, string author, string ext, int? width, int? height, HttpResponse res) =>
+            .MapGet("cover/{title}.{ext}", async (string title, string author, string ext, int? width, int? height, HttpResponse res) =>
             {
                 var imageStream = await CoverGenerator.Generate(
-                    name, 
+                    title, 
                     author,
                     ext, 
                     width ?? AvatarGenerator.BaseSize, 
@@ -154,9 +155,18 @@ public static class GenerateCoverHelpers
                 );
                 
                 res.Headers.Append("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
-                return Results.File(imageStream, $"image/{ext}");
+                return TypedResults.File(imageStream, $"image/{ext}");
             })
-            .WithName("GenerateCover");
+            .WithName("GenerateCover")
+            .WithOpenApi(operation =>
+            {
+                operation.Parameters[0].Description = "Title to appear on the cover";
+                operation.Parameters[1].Description = "author of the book";
+                operation.Parameters[2].Description = "Image format, one of [jpg, jpeg, png, webp]";
+                operation.Parameters[3].Description = $"Image width in pixels, default {AvatarGenerator.BaseSize}";
+                operation.Parameters[4].Description = $"Image height in pixels, default {(int)Math.Round(AvatarGenerator.BaseSize * 1.25)}";
+                return operation;
+            });
         return app;
     }
 }

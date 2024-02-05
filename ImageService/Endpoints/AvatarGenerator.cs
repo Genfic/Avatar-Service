@@ -1,4 +1,5 @@
 using ImageService.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
@@ -108,16 +109,24 @@ public static class GenerateAvatarHelpers
             .MapGet("avatar/{name}.{ext}", async (string name, string ext, int? width, int? height, HttpResponse res) =>
             {
                 var imageStream = await AvatarGenerator.Generate(
-                    name, 
-                    ext, 
-                    width ?? AvatarGenerator.BaseSize, 
+                    name,
+                    ext,
+                    width ?? AvatarGenerator.BaseSize,
                     height ?? AvatarGenerator.BaseSize
                 );
-                
+
                 res.Headers.Append("Cache-Control", $"public, immutable, max-age={TimeSpan.FromDays(365).TotalSeconds}");
-                return Results.File(imageStream, $"image/{ext}");
+                return TypedResults.File(imageStream, $"image/{ext}");
             })
-            .WithName("GenerateAvatar");
+            .WithName("GenerateAvatar")
+            .WithOpenApi(operation =>
+            {
+                operation.Parameters[0].Description = "User name";
+                operation.Parameters[1].Description = "Image format, one of [jpg, jpeg, png, webp]";
+                operation.Parameters[2].Description = $"Image width in pixels, default {AvatarGenerator.BaseSize}";
+                operation.Parameters[3].Description = $"Image height in pixels, default {AvatarGenerator.BaseSize}";
+                return operation;
+            });
         return app;
     }
 }
